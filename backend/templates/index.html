@@ -1,12 +1,18 @@
 {% extends "layout.html" %}
-{% block title %}Welcome · Barkr{% endblock %}
-{% block content %}
-<section class="center mt-8 stack">
-  <h1 class="card__name">Welcome to Barkr</h1>
-  <p class="card__age">A tiny MVP for dog profiles and playdates.</p>
-  <div class="stack">
-    <a class="btn btn--brand" href="{{ url_for('login') }}">Log In</a>
-    <a class="btn" href="{{ url_for('register') }}">Register</a>
+
+{% block title %}Home{% endblock %}
+
+{% block main %}
+  <div class="vh-100 position-relative d-flex flex-column justify-content-center align-items-center text-center">
+    <div class="mb-5">
+      <h1 class="display-5 mb-2">Welcome to Barkr</h1>
+      <p class="lead text-secondary">Create a profile for your dog and find playdate vibes.</p>
+    </div>
+
+    <!-- Bottom-centered buttons -->
+    <div class="bottom-cta d-flex gap-3">
+      <a class="btn btn-primary btn-lg px-4" href="{{ url_for('login') }}">Log In</a>
+      <a class="btn btn-outline-light btn-lg px-4" href="{{ url_for('register') }}">Register</a>
+    </div>
   </div>
-</section>
 {% endblock %}

@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+
+{% block title %}Discover{% endblock %}
+
+{% block main %}
+  <h1>Discover</h1>
+  <hr>
+
+  {% if dog %}
+    <div class="row gy-4 align-items-start mt-3">
+      <div class="col-12 col-md-5">
+        {% if dog.photo %}
+          <img class="img-fluid rounded border border-secondary" src="{{ dog.photo }}" alt="{{ dog.name }}">
+        {% else %}
+          <img class="img-fluid rounded border border-secondary" src="{{ url_for('static', filename='dogs/placeholder.jpg') }}" alt="Dog placeholder">
+        {% endif %}
+      </div>
+      <div class="col-12 col-md-7">
+        <h3 class="mb-1">{{ dog.name }}</h3>
+        <p class="text-secondary mb-2">
+          {{ dog.age if dog.age is not none else "?" }} · {{ dog.gender or "—" }} · {{ dog.breed or "Mixed" }}
+        </p>
+        {% if dog.personality %}
+          <p class="mb-2"><span class="badge text-bg-primary">{{ dog.personality }}</span></p>
+        {% endif %}
+        {% if dog.bio %}
+          <p class="mb-3">{{ dog.bio }}</p>
+        {% endif %}
+        <p class="small text-secondary mb-4">Owner: @{{ dog.username }}</p>
+
+        <form action="{{ url_for('swipe') }}" method="post" class="d-flex gap-3">
+          <input type="hidden" name="dog_id" value="{{ dog.id }}">
+          <button name="action" value="dislike" class="btn btn-outline-secondary px-4" type="submit">Dislike</button>
+          <button name="action" value="like" class="btn btn-primary px-4" type="submit">Like</button>
+        </form>
+      </div>
+    </div>
+  {% else %}
+    <div class="text-center py-5">
+      <h4 class="mb-2">You’re all caught up!</h4>
+      <p class="text-secondary">No more dogs to discover right now.</p>
+      <a class="btn btn-primary mt-3" href="{{ url_for('me') }}">View My Profile</a>
+    </div>
+  {% endif %}
+{% endblock %}

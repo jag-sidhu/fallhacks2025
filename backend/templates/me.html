@@ -1,34 +1,33 @@
 {% extends "layout.html" %}
-{% block title %}My Profile · Barkr{% endblock %}
-{% block content %}
-<section class="center mt-8">
+
+{% block title %}My Profile{% endblock %}
+
+{% block main %}
+  <h1>My Profile</h1>
+  <hr>
   {% if dog %}
-  <article class="card">
-    <div class="card__media">
-      {% if dog.photo %}
-        <img class="card__img" src="{{ dog.photo }}" alt="{{ dog.name }} photo">
-      {% else %}
-        <img class="card__img" src="{{ url_for('static', filename='dogs/placeholder.jpg') }}" alt="Dog placeholder">
-      {% endif %}
-      <span class="card__badge">@{{ user.username }}</span>
-    </div>
-    <div class="card__info">
-      <div class="card__title">
-        <h1 class="card__name">{{ dog.name }}</h1>
-        <span class="card__age">
-          {{ dog.age if dog.age is not none else "?" }} · {{ dog.gender or "—" }} · {{ dog.breed or "Mixed" }}
-        </span>
+    <div class="row gy-4 align-items-start mt-3">
+      <div class="col-12 col-md-5">
+        {% if dog.photo %}
+          <img class="img-fluid rounded border border-secondary" src="{{ dog.photo }}" alt="{{ dog.name }}">
+        {% else %}
+          <img class="img-fluid rounded border border-secondary" src="{{ url_for('static', filename='dogs/placeholder.jpg') }}" alt="Dog placeholder">
+        {% endif %}
       </div>
-      <div class="card__meta">
-        {% if dog.personality %}<span class="tag">{{ dog.personality }}</span>{% endif %}
+      <div class="col-12 col-md-7">
+        <h3 class="mb-1">{{ dog.name }}</h3>
+        <p class="text-secondary mb-3">
+          {{ dog.age if dog.age is not none else "?" }} &middot; {{ dog.gender or "—" }} &middot; {{ dog.breed or "Mixed" }}
+        </p>
+        {% if dog.personality %}
+          <p class="mb-2"><span class="badge text-bg-primary">{{ dog.personality }}</span></p>
+        {% endif %}
+        {% if dog.bio %}
+          <p class="mb-0">{{ dog.bio }}</p>
+        {% endif %}
       </div>
-      {% if dog.bio %}
-      <p class="mt-2" style="color:var(--muted);">{{ dog.bio }}</p>
-      {% endif %}
     </div>
-  </article>
   {% else %}
     <p>No dog profile yet. <a href="{{ url_for('register') }}">Create one</a>.</p>
   {% endif %}
-</section>
 {% endblock %}

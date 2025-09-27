@@ -1,77 +1,62 @@
 {% extends "layout.html" %}
-{% block title %}Register · Barkr{% endblock %}
-{% block content %}
-<section class="center mt-8">
-  <form class="card p-2 stack stack-lg" method="post" action="{{ url_for('register') }}" enctype="multipart/form-data" style="width:min(560px,95vw);">
-    <div class="card__info">
-      <div class="card__title"><h1 class="card__name">Create Account & Dog</h1></div>
 
-      <div class="form-field">
-        <label>Username</label>
-        <input type="text" name="username" required autocomplete="username" />
+{% block title %}Register{% endblock %}
+
+{% block main %}
+  <h1>Register</h1>
+  <hr>
+  <!-- keep ALL current options; include dog fields + photo -->
+  <form action="{{ url_for('register') }}" method="post" enctype="multipart/form-data" class="mt-3">
+    <!-- User -->
+    <div class="mb-3">
+      <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="username" placeholder="Username" type="text" required>
+    </div>
+    <div class="mb-3">
+      <input class="form-control mx-auto w-auto" name="password" placeholder="Password" type="password" required>
+    </div>
+    <div class="mb-3">
+      <input class="form-control mx-auto w-auto" name="confirmation" placeholder="Confirmation" type="password" required>
+    </div>
+
+    <hr class="my-4">
+
+    <!-- Dog -->
+    <h5 class="mb-3">Your Dog</h5>
+
+    <div class="mb-3">
+      <input class="form-control mx-auto w-auto" name="dog_name" placeholder="Dog Name" type="text" required>
+    </div>
+
+    <div class="row g-3 mb-3 justify-content-center">
+      <div class="col-auto">
+        <input class="form-control" name="dog_age" placeholder="Age (years)" type="number" min="0" step="1">
       </div>
-
-      <div class="form-grid">
-        <div class="form-field">
-          <label>Password</label>
-          <input type="password" name="password" required autocomplete="new-password" />
-        </div>
-        <div class="form-field">
-          <label>Confirm</label>
-          <input type="password" name="confirmation" required autocomplete="new-password" />
-        </div>
+      <div class="col-auto">
+        <select class="form-select" name="dog_gender">
+          <option value="" selected>Gender</option>
+          <option>Male</option>
+          <option>Female</option>
+          <option>Other</option>
+        </select>
       </div>
-
-      <hr class="divider"/>
-
-      <div class="card__title"><h2 class="card__name" style="font-size:1.1rem;">Your Dog</h2></div>
-
-      <div class="form-field">
-        <label>Photo</label>
-        <input type="file" name="dog_photo" accept=".png,.jpg,.jpeg,.gif,.webp" />
-        <small class="help">PNG/JPG/GIF/WebP up to 10MB</small>
-      </div>
-
-      <div class="form-field">
-        <label>Name</label>
-        <input type="text" name="dog_name" required />
-      </div>
-
-      <div class="form-grid">
-        <div class="form-field">
-          <label>Age (years)</label>
-          <input type="number" name="dog_age" min="0" step="1" />
-        </div>
-        <div class="form-field">
-          <label>Gender</label>
-          <select name="dog_gender">
-            <option value="">Select</option>
-            <option>Male</option>
-            <option>Female</option>
-            <option>Other</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-field">
-        <label>Breed</label>
-        <input type="text" name="dog_breed" placeholder="e.g., Golden Retriever" />
-      </div>
-
-      <div class="form-field">
-        <label>Personality</label>
-        <input type="text" name="dog_personality" placeholder="e.g., Zoomies pro, gentle, loves fetch" />
-      </div>
-
-      <div class="form-field">
-        <label>Bio</label>
-        <textarea name="dog_bio" rows="4" placeholder="Tell other humans about your good doggo"></textarea>
+      <div class="col-auto">
+        <input class="form-control" name="dog_breed" placeholder="Breed (e.g., Golden Retriever)" type="text">
       </div>
     </div>
 
-    <div class="actions" style="grid-template-columns:1fr;">
-      <button class="btn btn--brand" type="submit">Create Profile</button>
+    <div class="mb-3">
+      <input class="form-control mx-auto w-auto" name="dog_personality" placeholder="Personality (e.g., Zoomies pro, gentle, loves fetch)" type="text">
     </div>
+
+    <div class="mb-3">
+      <textarea class="form-control" name="dog_bio" rows="3" placeholder="Short bio"></textarea>
+    </div>
+
+    <div class="mb-4">
+      <input class="form-control mx-auto w-auto" name="dog_photo" type="file" accept=".png,.jpg,.jpeg,.gif,.webp">
+      <div class="form-text text-center">PNG/JPG/GIF/WebP up to 10MB</div>
+    </div>
+
+    <button class="btn btn-primary" type="submit">Create Profile</button>
   </form>
-</section>
 {% endblock %}

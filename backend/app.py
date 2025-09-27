@@ -9,11 +9,6 @@ from flask import (
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
-# ----------------------------
-# App config
-# ----------------------------
-
-print(">>> LOADED app.py")
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -22,17 +17,13 @@ app.config["EXPLAIN_TEMPLATE_LOADING"] = True
 os.makedirs(os.path.join("static", "backgrounds"), exist_ok=True)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-change-me")
 
-
-# Uploads
 UPLOAD_FOLDER = os.path.join("static", "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024  # 10 MB
+app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024 
 
 
-
-# Database path
 DB_PATH = os.path.join(os.path.dirname(__file__), "barkr.db")
 
 
@@ -73,6 +64,17 @@ def bootstrap():
         photo TEXT, -- /static/uploads/filename.jpg
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id)
+                     
+                     
+    );  
+    CREATE TABLE IF NOT EXISTS likes (
+        user_id        INTEGER NOT NULL,
+        target_dog_id  INTEGER NOT NULL,
+        value          INTEGER NOT NULL CHECK (value IN (-1, 1)), -- 1=like, -1=dislike
+        created_at     DATETIME DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (user_id, target_dog_id),
+        FOREIGN KEY (user_id) REFERENCES users(id),
+        FOREIGN KEY (target_dog_id) REFERENCES dogs(id)
     );
     """)
     db.commit()
@@ -113,7 +115,7 @@ def after_request(response):
 @app.route("/")
 def index():
     if session.get("user_id"):
-        return redirect(url_for("me"))
+        return redirect(url_for("discover"))  # new home
     return render_template("index.html")
 
 # ---- Auth ----
@@ -152,7 +154,7 @@ def register():
       dog_photo, dog_name, dog_age, dog_gender, dog_breed, dog_personality, dog_bio
     """
     if request.method == "POST":
-        # user fields
+
         username = (request.form.get("username") or "").strip()
         password = request.form.get("password") or ""
         confirmation = request.form.get("confirmation") or ""
@@ -164,7 +166,7 @@ def register():
             flash("Passwords do not match.", "error")
             return render_template("register.html")
 
-        # dog fields
+
         dog_name = (request.form.get("dog_name") or "").strip()
         if not dog_name:
             flash("Dog name is required.", "error")
@@ -180,7 +182,6 @@ def register():
         dog_personality = (request.form.get("dog_personality") or "").strip()
         dog_bio = (request.form.get("dog_bio") or "").strip()
 
-        # photo upload (optional)
         photo_path = None
         file = request.files.get("dog_photo")
         if file and file.filename:
@@ -197,7 +198,7 @@ def register():
             file.save(os.path.join(app.config["UPLOAD_FOLDER"], final_name))
             photo_path = f"/static/uploads/{final_name}"
 
-        # create user + dog
+
         db = get_db()
         try:
             db.execute(
@@ -212,7 +213,7 @@ def register():
             )
             db.commit()
         except sqlite3.IntegrityError:
-            # likely username duplicate
+   
             db.rollback()
             flash("Username already exists.", "error")
             return render_template("register.html")
@@ -223,6 +224,68 @@ def register():
         return redirect(url_for("me"))
 
     return render_template("register.html")
+
+@app.route("/discover")
+@login_required
+def discover():
+    """
+    Show the next dog card that:
+      - is not your own dog
+      - you haven't already swiped on
+    """
+    db = get_db()
+    next_dog = db.execute(
+        """
+        SELECT d.*, u.username
+        FROM dogs d
+        JOIN users u ON u.id = d.user_id
+        WHERE d.user_id != ?
+          AND d.id NOT IN (
+              SELECT target_dog_id FROM likes WHERE user_id = ?
+          )
+        ORDER BY d.created_at DESC
+        LIMIT 1
+        """,
+        (session["user_id"], session["user_id"])
+    ).fetchone()
+
+    return render_template("discover.html", dog=next_dog)
+
+
+@app.route("/swipe", methods=["POST"])
+@login_required
+def swipe():
+    """
+    Record a like/dislike, then go to the next card.
+    POST fields:
+      dog_id: target dog's id
+      action: 'like' or 'dislike'
+    """
+    dog_id = request.form.get("dog_id")
+    action = request.form.get("action")
+
+    if not dog_id or action not in {"like", "dislike"}:
+        flash("Invalid swipe.", "error")
+        return redirect(url_for("discover"))
+
+    value = 1 if action == "like" else -1
+
+    db = get_db()
+    # Upsert: if already swiped, update; else insert
+    db.execute(
+        """
+        INSERT INTO likes (user_id, target_dog_id, value)
+        VALUES (?, ?, ?)
+        ON CONFLICT(user_id, target_dog_id)
+        DO UPDATE SET value = excluded.value,
+                      created_at = CURRENT_TIMESTAMP
+        """,
+        (session["user_id"], int(dog_id), value)
+    )
+    db.commit()
+
+    return redirect(url_for("discover"))
+
 
 # ---- Profile (read-only) ----
 @app.route("/me")
@@ -237,6 +300,8 @@ def me():
 @app.route("/uploads/<path:filename>")
 def uploads(filename):
     return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)

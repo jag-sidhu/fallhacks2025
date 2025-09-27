@@ -1,28 +1,17 @@
 {% extends "layout.html" %}
-{% block title %}Log In · Barkr{% endblock %}
-{% block content %}
-<section class="center mt-8">
-  <form class="card p-2 stack stack-lg" method="post" action="{{ url_for('login') }}" style="width:min(520px,95vw);">
-    <div class="card__info">
-      <div class="card__title"><h1 class="card__name">Log In</h1></div>
 
-      <div class="form-field">
-        <label>Username</label>
-        <input type="text" name="username" required autocomplete="username" />
-      </div>
-      <div class="form-field">
-        <label>Password</label>
-        <input type="password" name="password" required autocomplete="current-password" />
-      </div>
-    </div>
+{% block title %}Log In{% endblock %}
 
-    <div class="actions" style="grid-template-columns:1fr;">
-      <button class="btn btn--brand" type="submit">Continue</button>
-    </div>
-
-    <div class="p-2">
-      <small>New here? <a href="{{ url_for('register') }}">Create an account</a></small>
-    </div>
-  </form>
-</section>
+{% block main %}
+    <h1>Log In</h1>
+    <hr>
+    <form action="{{ url_for('login') }}" method="post" class="mt-3">
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="username" placeholder="Username" type="text" required>
+        </div>
+        <div class="mb-3">
+            <input class="form-control mx-auto w-auto" name="password" placeholder="Password" type="password" required>
+        </div>
+        <button class="btn btn-primary" type="submit">Log In</button>
+    </form>
 {% endblock %}
