@@ -9,9 +9,7 @@ from flask import (
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
-# ----------------------------
 # App config
-# ----------------------------
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-change-me")
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -23,7 +21,7 @@ ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024  # 10 MB
 
-# Audio folder (you provide mp3s)
+# Audio folder 
 AUDIO_FOLDER = os.path.join("static", "audio")
 os.makedirs(AUDIO_FOLDER, exist_ok=True)
 
@@ -31,11 +29,7 @@ os.makedirs(AUDIO_FOLDER, exist_ok=True)
 DB_PATH = os.path.join(os.path.dirname(__file__), "barkr.db")
 
 
-# ----------------------------
 # Audio snippet catalog
-# artist -> list of {key,title,file,answers}
-# Make sure the files exist in static/audio/
-# ----------------------------
 ARTIST_SONGS = {
     "Drake": [
         {"key": "drake_godsplan", "title": "God's Plan",
@@ -78,9 +72,7 @@ ARTIST_SONGS = {
 }
 
 
-# ----------------------------
-# DB helpers (sqlite3)
-# ----------------------------
+# DB Helpers
 def get_db():
     if "db" not in g:
         g.db = sqlite3.connect(DB_PATH)
@@ -138,9 +130,8 @@ with app.app_context():
     bootstrap()
 
 
-# ----------------------------
+
 # Utilities
-# ----------------------------
 def allowed_file(filename: str) -> bool:
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -168,7 +159,7 @@ def inject_match_count():
         if not mydog:
             return dict(match_count=0)
 
-        # Count mutual likes (same logic as /matches but COUNT)
+
         row = db.execute(
             """
             SELECT COUNT(*) AS c
@@ -185,30 +176,25 @@ def inject_match_count():
         ).fetchone()
         return dict(match_count=row["c"] if row else 0)
     except Exception:
-        # don't break rendering if something goes wrong
         return dict(match_count=0)
 
-
+# Avoid bowser caching
 @app.after_request
 def after_request(response):
-    # avoid browser caching during dev
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
     return response
 
-
-# ----------------------------
 # Routes
-# ----------------------------
 @app.route("/")
 def index():
     if session.get("user_id"):
-        return redirect(url_for("discover"))  # make the feed the home
+        return redirect(url_for("discover"))  
     return render_template("index.html")
 
 
-# ---- Auth ----
+# Auth
 @app.route("/login", methods=["GET", "POST"])
 def login():
     session.clear()
@@ -256,7 +242,6 @@ def register():
             flash("Passwords do not match.", "error")
             return render_template("register.html")
 
-        # dog fields
         dog_name = (request.form.get("dog_name") or "").strip()
         if not dog_name:
             flash("Dog name is required.", "error")
@@ -273,7 +258,6 @@ def register():
             flash("Please pick a favourite artist.", "error")
             return render_template("register.html")
 
-        # photo upload (optional)
         photo_path = None
         file = request.files.get("dog_photo")
         if file and file.filename:
@@ -290,7 +274,6 @@ def register():
             file.save(os.path.join(app.config["UPLOAD_FOLDER"], final_name))
             photo_path = f"/static/uploads/{final_name}"
 
-        # create user + dog
         db = get_db()
         try:
             db.execute(
@@ -317,7 +300,7 @@ def register():
     return render_template("register.html")
 
 
-# ---- Discover / Swiping ----
+# Discover
 @app.route("/discover")
 @login_required
 def discover():
@@ -371,7 +354,6 @@ def swipe():
         db.commit()
         return redirect(url_for("discover"))
 
-    # action == "like"
     mine = my_dog_id()
     if not mine:
         flash("Set up your dog profile first.", "error")
@@ -382,7 +364,6 @@ def swipe():
         return redirect(url_for("discover"))
     target_user_id = target_owner["user_id"]
 
-    # Did the target's owner already like my dog?
     mutual = db.execute("""
       SELECT 1 FROM likes
       WHERE user_id = ? AND target_dog_id = ? AND value = 1
@@ -390,10 +371,8 @@ def swipe():
     """, (target_user_id, mine)).fetchone()
 
     if mutual:
-        # Go to the song gate; if correct, we'll finalize and show match
         return redirect(url_for("songgate", dog_id=dog_id))
 
-    # Not mutual yet → just record the like
     db.execute("""
         INSERT INTO likes (user_id, target_dog_id, value)
         VALUES (?, ?, 1)
@@ -404,7 +383,7 @@ def swipe():
     return redirect(url_for("discover"))
 
 
-# ---- Song Gate ----
+# Song Gate
 @app.route("/songgate/<int:dog_id>", methods=["GET", "POST"])
 @login_required
 def songgate(dog_id):
@@ -417,10 +396,8 @@ def songgate(dog_id):
     artist = (target["favorite_artist"] or "").strip()
     choices = ARTIST_SONGS.get(artist, [])
     if not choices:
-        # No snippets configured -> skip gate and finalize
         return finalize_like_then_redirect(dog_id, matched=True)
 
-    # Pick a snippet (stick to one per session by passing ?key=)
     key = request.args.get("key")
     if not key:
         pick = random.choice(choices)
@@ -437,7 +414,7 @@ def songgate(dog_id):
         if guess in normalized:
             return finalize_like_then_redirect(dog_id, matched=True)
         else:
-            flash("Close, but not the song we were looking for. Try again!", "error")
+            flash("Wrong!", "error")
 
     return render_template("songgate.html", dog=target, artist=artist, snippet=snippet)
 
@@ -453,20 +430,15 @@ def finalize_like_then_redirect(target_dog_id, matched=False):
     db.commit()
 
     if matched:
-        flash("It’s a match! 🎉", "ok")
+        flash("It’s a match!", "ok")
         return redirect(url_for("matches"))
     return redirect(url_for("discover"))
 
 
-# ---- Matches ----
+# Matches
 @app.route("/matches")
 @login_required
 def matches():
-    """
-    Show two lists:
-      - pending_matches: they liked me, but I haven't completed the song gate (i.e., I haven't recorded a like=1 yet)
-      - confirmed_matches: mutual like (both recorded like=1)
-    """
     db = get_db()
     mydog = my_dog_id()
     if not mydog:
@@ -518,7 +490,7 @@ def matches():
 
 
 
-# ---- Profile (read-only) ----
+# Profile
 @app.route("/me")
 @login_required
 def me():
@@ -527,15 +499,11 @@ def me():
     dog = db.execute("SELECT * FROM dogs WHERE user_id = ?", (session["user_id"],)).fetchone()
     return render_template("me.html", user=user, dog=dog)
 
-
-# ---- Serve uploads directly (optional) ----
 @app.route("/uploads/<path:filename>")
 def uploads(filename):
     return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
 
 
-# ----------------------------
 # Run
-# ----------------------------
 if __name__ == "__main__":
     app.run(debug=True)
