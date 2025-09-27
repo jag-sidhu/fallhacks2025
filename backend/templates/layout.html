@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+   
+   
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Barkr — Find Playdates{% endblock %}</title>
+
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <!-- Top Nav -->
+  <header class="nav">
+    <div class="nav__inner container">
+      <a class="brand" href="{{ url_for('index') }}">
+        <span class="brand__logo">🐶</span>
+        <span class="brand__name">Barkr</span>
+      </a>
+      <nav class="nav__links">
+        {% if session.get('user_id') %}
+          <a href="{{ url_for('me') }}">My Profile</a>
+          <a href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+          <a href="{{ url_for('login') }}">Login</a>
+          <a href="{{ url_for('register') }}">Register</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <!-- Flash messages -->
+  <div class="container mt-4">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-stack">
+          {% for category, message in messages %}
+            <div class="flash flash-{{ category|default('info') }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <!-- Main Content -->
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer container">
+    <small>&copy; {{ 2025 }} Barkr · Built with ❤️</small>
+  </footer>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

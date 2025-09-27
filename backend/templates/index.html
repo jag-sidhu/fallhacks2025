@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block title %}Welcome · Barkr{% endblock %}
+{% block content %}
+<section class="center mt-8 stack">
+  <h1 class="card__name">Welcome to Barkr</h1>
+  <p class="card__age">A tiny MVP for dog profiles and playdates.</p>
+  <div class="stack">
+    <a class="btn btn--brand" href="{{ url_for('login') }}">Log In</a>
+    <a class="btn" href="{{ url_for('register') }}">Register</a>
+  </div>
+</section>
+{% endblock %}

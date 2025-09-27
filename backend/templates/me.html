@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+{% block title %}My Profile · Barkr{% endblock %}
+{% block content %}
+<section class="center mt-8">
+  {% if dog %}
+  <article class="card">
+    <div class="card__media">
+      {% if dog.photo %}
+        <img class="card__img" src="{{ dog.photo }}" alt="{{ dog.name }} photo">
+      {% else %}
+        <img class="card__img" src="{{ url_for('static', filename='dogs/placeholder.jpg') }}" alt="Dog placeholder">
+      {% endif %}
+      <span class="card__badge">@{{ user.username }}</span>
+    </div>
+    <div class="card__info">
+      <div class="card__title">
+        <h1 class="card__name">{{ dog.name }}</h1>
+        <span class="card__age">
+          {{ dog.age if dog.age is not none else "?" }} · {{ dog.gender or "—" }} · {{ dog.breed or "Mixed" }}
+        </span>
+      </div>
+      <div class="card__meta">
+        {% if dog.personality %}<span class="tag">{{ dog.personality }}</span>{% endif %}
+      </div>
+      {% if dog.bio %}
+      <p class="mt-2" style="color:var(--muted);">{{ dog.bio }}</p>
+      {% endif %}
+    </div>
+  </article>
+  {% else %}
+    <p>No dog profile yet. <a href="{{ url_for('register') }}">Create one</a>.</p>
+  {% endif %}
+</section>
+{% endblock %}
