@@ -55,6 +55,7 @@ body{
   background-color: var(--primary);
   border-color: var(--primary);
   color: #fff;
+  
 }
 .btn-primary:hover{
   background-color: var(--primary-2);
@@ -97,3 +98,25 @@ footer{ color: var(--muted); border-top: 1px solid var(--border); }
 
 /* Headings */
 h1,h2,h3,.display-5{ font-weight: 800; letter-spacing: .2px; }
+
+/* Center primary buttons in main content */
+main .btn-primary {
+  display: block;
+  margin: 0.75rem auto 0; /* top auto-bottom center */
+}
+
+/* Centered nav title */
+.navbar .navbar-center-text {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-weight: 800;
+  text-decoration: none;
+  color: #000;           /* black to match your theme */
+  letter-spacing: 0.3px;
+}
+
+/* Keep it readable on small screens: slightly smaller */
+@media (max-width: 480px) {
+  .navbar .navbar-center-text { font-size: 0.95rem; }
+}

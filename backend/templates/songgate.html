@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+
+{% block title %}Name that tune{% endblock %}
+
+{% block main %}
+  <h1>Name that tune</h1>
+  <hr>
+
+  <p class="mb-3">
+    Time for some song trivia! Prove you know
+    {{ artist }}: listen to this snippet and type the song title.
+  </p>
+
+  <div class="card p-3 mb-3">
+    <audio controls preload="auto" style="width:100%">
+      <source src="{{ snippet.file }}" type="audio/mpeg">
+      Your browser doesn’t support the audio element.
+    </audio>
+  </div>
+
+  <form method="post" class="d-flex gap-2 align-items-center">
+    <input class="form-control" name="answer" placeholder="Song title" autocomplete="off" required>
+    <button class="btn btn-primary" type="submit">Submit</button>
+  </form>
+
+  <p class="text-secondary mt-3 small">
+    (Spelling counts a little—but we’re pretty forgiving)
+  </p>
+{% endblock %}

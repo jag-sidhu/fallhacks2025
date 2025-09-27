@@ -3,32 +3,43 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{% block title %}Barkr{% endblock %}</title>
+    <title>{% block title %}Tindog{% endblock %}</title>
 
-    <!-- Bootstrap (for .form-control, .btn, spacing utilities, etc.) -->
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Your custom styles -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom border-secondary">
+    <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom border-secondary position-relative">
       <div class="container">
+        <!-- Left: logo -->
         <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('index') }}">
-  <img src="{{ url_for('static', filename='uploads/tindog.webp') }}"
-       alt="Tindog"
-       class="brand-logo">
-</a>
+          <img src="{{ url_for('static', filename='uploads/tindawg.webp') }}"
+               alt="Tindog" class="brand-logo">
+        </a>
 
+        <!-- Center: title -->
+        <a class="navbar-center-text" href="{{ url_for('index') }}">Tindog</a>
+
+        <!-- Right: links -->
         <div class="ms-auto d-flex gap-3">
-          {% if session.get('user_id') %}
-             <a class="nav-link" href="{{ url_for('discover') }}">Discover</a>
-            <a class="nav-link" href="{{ url_for('me') }}">My Profile</a>
-            <a class="btn btn-outline btn-sm" href="{{ url_for('logout') }}">Logout</a>
-          {% else %}
-            <a class="nav-link" href="{{ url_for('login') }}">Login</a>
-            <a class="btn btn-primary btn-sm" href="{{ url_for('register') }}">Register</a>
-          {% endif %}
-        </div>
+  {% if session.get('user_id') %}
+    <a class="nav-link" href="{{ url_for('discover') }}">Discover</a>
+    <a class="nav-link position-relative" href="{{ url_for('matches') }}">
+      Matches
+      {% if match_count %}
+        <span class="badge rounded-pill text-bg-primary ms-1">{{ match_count }}</span>
+      {% endif %}
+    </a>
+    <a class="nav-link" href="{{ url_for('me') }}">My Profile</a>
+    <a class="btn btn-outline btn-sm" href="{{ url_for('logout') }}">Logout</a>
+  {% else %}
+    <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+    <a class="btn btn-primary btn-sm" href="{{ url_for('register') }}">Register</a>
+  {% endif %}
+</div>
+
       </div>
     </nav>
 
