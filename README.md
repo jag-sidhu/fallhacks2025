@@ -17,9 +17,6 @@ Tindog is a Tinder-inspired web app where users can sign up, create a profile fo
 - Frontend: HTML, CSS
 - Database: SQLite
 
-## Wireframe
-URL: 
-
 ## Future Improvements
 - Create swipe animations similar to Tinder
 - Mobile version of web app
